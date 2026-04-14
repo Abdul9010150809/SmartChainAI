@@ -5,10 +5,31 @@ import { Shipment } from '../models/Shipment';
 import { User } from '../models/User';
 import { demoShipments } from '../data/demoSeed';
 
-const DEMO_EMAIL = 'demo@sensechainai.ai';
-const DEMO_PASSWORD = 'demo-access';
+export type DemoRole = 'admin' | 'operator' | 'viewer';
 
-export async function seedDemoShipments(ownerId: string) {
+const DEMO_TRACKING_PREFIX: Record<DemoRole, string> = {
+  admin: 'ADM',
+  operator: 'OPR',
+  viewer: 'VWR'
+};
+
+const DEMO_ACCOUNTS: Array<{
+  role: DemoRole;
+  name: string;
+  email: string;
+  password: string;
+}> = [
+  { role: 'admin', name: 'Demo Admin', email: 'admin@smartchainai.ai', password: 'demo-admin' },
+  { role: 'operator', name: 'Demo Operator', email: 'operator@smartchainai.ai', password: 'demo-operator' },
+  { role: 'viewer', name: 'Demo Viewer', email: 'viewer@smartchainai.ai', password: 'demo-viewer' }
+];
+
+function buildDemoTrackingNumber(baseTrackingNumber: string, role: DemoRole) {
+  const suffix = baseTrackingNumber.replace(/^SC-/, '');
+  return `SC-${DEMO_TRACKING_PREFIX[role]}-${suffix}`;
+}
+
+export async function seedDemoShipments(ownerId: string, role: DemoRole) {
   const shipmentCount = await Shipment.countDocuments({ owner: ownerId });
   if (shipmentCount > 0) {
     return;
@@ -17,7 +38,7 @@ export async function seedDemoShipments(ownerId: string) {
   const now = Date.now();
   await Shipment.insertMany(
     demoShipments.map((shipment) => ({
-      trackingNumber: shipment.trackingNumber,
+      trackingNumber: buildDemoTrackingNumber(shipment.trackingNumber, role),
       origin: shipment.origin,
       destination: shipment.destination,
       carrier: shipment.carrier,
@@ -52,43 +73,51 @@ export function buildAuthPayload(user: { _id: { toString(): string }; name: stri
   };
 }
 
-export async function getDemoSession() {
-  const user = await ensureDemoUser();
+export async function getDemoSession(role: DemoRole = 'operator') {
+  const user = await ensureDemoUser(role);
 
-  await seedDemoShipments(user._id.toString());
+  await seedDemoShipments(user._id.toString(), role);
   return buildAuthPayload(user);
 }
 
 export async function seedDemoData() {
-  const user = await ensureDemoUser();
-  const count = await Shipment.countDocuments({ owner: user._id.toString() });
-  if (count === 0) {
-    await seedDemoShipments(user._id.toString());
+  for (const account of DEMO_ACCOUNTS) {
+    const user = await ensureDemoUser(account.role);
+    const count = await Shipment.countDocuments({ owner: user._id.toString() });
+    if (count === 0) {
+      await seedDemoShipments(user._id.toString(), account.role);
+    }
   }
-  return buildAuthPayload(user);
 }
 
-export async function ensureDemoUser() {
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
-  const existingUser = await User.findOne({ email: DEMO_EMAIL });
+export async function ensureDemoUser(role: DemoRole = 'operator') {
+  const account = DEMO_ACCOUNTS.find((entry) => entry.role === role) ?? DEMO_ACCOUNTS[1];
+  const passwordHash = await bcrypt.hash(account.password, 12);
+  const existingUser = await User.findOne({ email: account.email });
 
   return existingUser ?? User.create({
-    name: 'Demo Operator',
-    email: DEMO_EMAIL,
+    name: account.name,
+    email: account.email,
     passwordHash,
-    role: 'operator'
+    role: account.role
   });
 }
 
 export async function resetDemoData() {
-  const existingUser = await User.findOne({ email: DEMO_EMAIL });
+  for (const account of DEMO_ACCOUNTS) {
+    const existingUser = await User.findOne({ email: account.email });
 
-  if (existingUser) {
-    await Shipment.deleteMany({ owner: existingUser._id.toString() });
-    await User.deleteOne({ _id: existingUser._id });
+    if (existingUser) {
+      await Shipment.deleteMany({ owner: existingUser._id.toString() });
+      await User.deleteOne({ _id: existingUser._id });
+    }
   }
 
-  const user = await ensureDemoUser();
-  await seedDemoShipments(user._id.toString());
+  const user = await ensureDemoUser('operator');
+  await seedDemoShipments(user._id.toString(), 'operator');
   return buildAuthPayload(user);
+}
+
+export function getDemoAccounts() {
+  return DEMO_ACCOUNTS.map(({ role, name, email, password }) => ({ role, name, email, password }));
 }

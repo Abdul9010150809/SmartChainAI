@@ -1,0 +1,6 @@
+Tracking: SC-IN-202601
+Origin: Mumbai, IN
+Destination: Dubai, UAE
+Carrier: BlueRoute Cargo
+Declared Value: 124500
+Notes: Cargo cleared at Nhava Sheva and queued for export lane.

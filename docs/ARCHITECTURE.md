@@ -1,6 +1,6 @@
 # Architecture Overview
 
-SenseChainAI uses a three-service layout:
+SmartChainAI uses a three-service layout:
 
 1. `frontend` handles user experience, dashboard visualizations, and API consumption.
 2. `backend` owns business logic, authentication, persistence, validation, and orchestration.

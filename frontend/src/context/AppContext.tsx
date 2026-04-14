@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { createShipment, fetchDashboardSnapshot } from '../services/dashboard';
-import { activateDemoSession, clearStoredAuthState, getStoredAuthMode, getStoredToken, loginWithCredentials, signOut } from '../services/auth';
+import { activateDemoSession, clearStoredAuthState, fetchCurrentUser, getStoredAuthMode, getStoredToken, loginWithCredentials, registerWithCredentials, signOut } from '../services/auth';
 import type { DashboardSnapshot, ShipmentDraft, Shipment } from '../types';
-import type { AuthMode, AuthSession } from '../services/auth';
+import type { AuthMode, AuthSession, AuthUser, DemoRole } from '../services/auth';
 
 interface AppContextValue {
   authenticated: boolean;
   authLoading: boolean;
   authMode: AuthMode;
+  currentUser: AuthUser | null;
   dashboard: DashboardSnapshot | null;
   shipments: Shipment[];
   loading: boolean;
@@ -17,7 +18,8 @@ interface AppContextValue {
   submitShipment: (payload: ShipmentDraft) => Promise<void>;
   selectShipment: (shipmentId: string | null) => void;
   login: (email: string, password: string) => Promise<AuthSession>;
-  useDemoSession: () => Promise<AuthSession>;
+  register: (name: string, email: string, password: string, role?: DemoRole) => Promise<AuthSession>;
+  useDemoSession: (role?: DemoRole) => Promise<AuthSession>;
   logout: () => Promise<void>;
 }
 
@@ -27,6 +29,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [dashboard, setDashboard] = useState<DashboardSnapshot | null>(null);
   const [authenticated, setAuthenticated] = useState(Boolean(getStoredToken()));
   const [authMode, setAuthMode] = useState<AuthMode>(getStoredAuthMode());
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +58,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void (async () => {
       try {
         if (getStoredToken()) {
+          const user = await fetchCurrentUser();
+          setCurrentUser(user);
           setAuthenticated(true);
         } else if (authMode === 'demo') {
           await useDemoSessionInternal();
@@ -63,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       } catch (cause) {
         clearStoredAuthState();
+        setCurrentUser(null);
         setAuthenticated(false);
         setError(cause instanceof Error ? cause.message : 'Unable to prepare session');
       } finally {
@@ -86,20 +92,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const session = await loginWithCredentials(email, password);
     setAuthMode('manual');
+    setCurrentUser(session.user);
     setAuthenticated(true);
     await refreshDashboard();
     return session;
   }
 
-  async function useDemoSessionInternal() {
-    const session = await activateDemoSession();
+  async function register(name: string, email: string, password: string, role: DemoRole = 'operator') {
+    const session = await registerWithCredentials(name, email, password, role);
+    setAuthMode('manual');
+    setCurrentUser(session.user);
+    setAuthenticated(true);
+    await refreshDashboard();
+    return session;
+  }
+
+  async function useDemoSessionInternal(role: DemoRole = 'operator') {
+    const session = await activateDemoSession(role);
     setAuthMode('demo');
+    setCurrentUser(session.user);
     setAuthenticated(true);
     return session;
   }
 
-  async function useDemoSession() {
-    const session = await useDemoSessionInternal();
+  async function useDemoSession(role: DemoRole = 'operator') {
+    const session = await useDemoSessionInternal(role);
     await refreshDashboard();
     return session;
   }
@@ -108,6 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await signOut();
     clearStoredAuthState();
     setDashboard(null);
+    setCurrentUser(null);
     setAuthenticated(false);
     setAuthMode('manual');
     setSelectedShipmentId(null);
@@ -117,6 +135,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     authenticated,
     authLoading,
     authMode,
+    currentUser,
     dashboard,
     shipments: dashboard?.shipments ?? [],
     loading,
@@ -126,9 +145,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     submitShipment,
     selectShipment: setSelectedShipmentId,
     login,
+    register,
     useDemoSession,
     logout
-  }), [authenticated, authLoading, authMode, dashboard, error, loading, selectedShipmentId, refreshDashboard, submitShipment, login, useDemoSession, logout]);
+  }), [authenticated, authLoading, authMode, currentUser, dashboard, error, loading, selectedShipmentId, refreshDashboard, submitShipment, login, register, useDemoSession, logout]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

@@ -15,7 +15,7 @@ services:
     env_file:
       - ./.env.example
     environment:
-      MONGO_URI: mongodb://mongo:27017/sensechainai
+      MONGO_URI: mongodb://mongo:27017/smartchainai
       AI_SERVICE_URL: http://ai-service:8000
     ports:
       - "5000:5000"

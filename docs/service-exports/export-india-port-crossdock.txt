@@ -1,0 +1,7 @@
+Service Export
+Reference: SC-IN-SEA-41007
+From: Chennai, IN
+To: Hyderabad, IN
+Logistics Provider: NorthStar Freight
+Shipment Value: 132000
+Notes: Port arrival completed, cross-dock route initiated.

@@ -1,0 +1,49 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SmartChainAI Dashboard Overview">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="40" y="28" width="1200" height="56" rx="14" fill="#ffffff22"/>
+  <text x="68" y="62" fill="#d1fae5" font-size="24" font-family="Segoe UI, Arial">SmartChainAI - Dashboard</text>
+  <rect x="40" y="110" width="230" height="128" rx="14" fill="#ffffff"/>
+  <rect x="290" y="110" width="230" height="128" rx="14" fill="#ffffff"/>
+  <rect x="540" y="110" width="230" height="128" rx="14" fill="#ffffff"/>
+  <rect x="790" y="110" width="230" height="128" rx="14" fill="#ffffff"/>
+  <rect x="1040" y="110" width="200" height="128" rx="14" fill="#ffffff"/>
+  <text x="62" y="148" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">Active Shipments</text>
+  <text x="62" y="196" fill="#0f766e" font-size="36" font-weight="700" font-family="Segoe UI, Arial">42</text>
+  <text x="312" y="148" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">Delivered</text>
+  <text x="312" y="196" fill="#2563eb" font-size="36" font-weight="700" font-family="Segoe UI, Arial">118</text>
+  <text x="562" y="148" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">Delayed</text>
+  <text x="562" y="196" fill="#dc2626" font-size="36" font-weight="700" font-family="Segoe UI, Arial">7</text>
+  <text x="812" y="148" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">Avg Transit</text>
+  <text x="812" y="196" fill="#7c3aed" font-size="36" font-weight="700" font-family="Segoe UI, Arial">36h</text>
+  <text x="1062" y="148" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">On-Time</text>
+  <text x="1062" y="196" fill="#16a34a" font-size="36" font-weight="700" font-family="Segoe UI, Arial">91%</text>
+  <rect x="40" y="262" width="760" height="410" rx="14" fill="#ffffff"/>
+  <text x="62" y="300" fill="#0f172a" font-size="20" font-family="Segoe UI, Arial">Shipment Inventory</text>
+  <rect x="62" y="320" width="716" height="52" rx="10" fill="#f8fafc"/>
+  <rect x="62" y="384" width="716" height="52" rx="10" fill="#f8fafc"/>
+  <rect x="62" y="448" width="716" height="52" rx="10" fill="#f8fafc"/>
+  <rect x="62" y="512" width="716" height="52" rx="10" fill="#f8fafc"/>
+  <text x="82" y="352" fill="#334155" font-size="14" font-family="Segoe UI, Arial">SC-OPR-10001 | Mumbai, IN -> Dubai, UAE | Risk 22%</text>
+  <text x="82" y="416" fill="#334155" font-size="14" font-family="Segoe UI, Arial">SC-OPR-10002 | Delhi, IN -> Bengaluru, IN | Risk 18%</text>
+  <text x="82" y="480" fill="#334155" font-size="14" font-family="Segoe UI, Arial">SC-OPR-10003 | Chennai, IN -> Hyderabad, IN | Risk 31%</text>
+  <text x="82" y="544" fill="#334155" font-size="14" font-family="Segoe UI, Arial">SC-OPR-10004 | Kolkata, IN -> Jaipur, IN | Risk 11%</text>
+  <rect x="820" y="262" width="420" height="410" rx="14" fill="#0f172a"/>
+  <text x="842" y="300" fill="#e2e8f0" font-size="20" font-family="Segoe UI, Arial">Selected Shipment</text>
+  <text x="842" y="336" fill="#5eead4" font-size="28" font-weight="700" font-family="Segoe UI, Arial">SC-OPR-10001</text>
+  <text x="842" y="366" fill="#cbd5e1" font-size="14" font-family="Segoe UI, Arial">Mumbai, IN -> Dubai, UAE</text>
+  <rect x="842" y="388" width="376" height="120" rx="10" fill="#ffffff14"/>
+  <text x="862" y="422" fill="#d1fae5" font-size="14" font-family="Segoe UI, Arial">Carrier: BlueRoute Cargo</text>
+  <text x="862" y="448" fill="#d1fae5" font-size="14" font-family="Segoe UI, Arial">Current: Jebel Ali Port</text>
+  <text x="862" y="474" fill="#d1fae5" font-size="14" font-family="Segoe UI, Arial">ETA: 2026-04-16 12:00</text>
+  <rect x="842" y="526" width="376" height="126" rx="10" fill="#ffffff14"/>
+  <text x="862" y="560" fill="#e2e8f0" font-size="14" font-family="Segoe UI, Arial">Recent Events:</text>
+  <text x="862" y="586" fill="#d1fae5" font-size="13" font-family="Segoe UI, Arial">- Departed origin hub</text>
+  <text x="862" y="608" fill="#d1fae5" font-size="13" font-family="Segoe UI, Arial">- Customs cleared</text>
+  <text x="862" y="630" fill="#d1fae5" font-size="13" font-family="Segoe UI, Arial">- In transit to destination</text>
+</svg>

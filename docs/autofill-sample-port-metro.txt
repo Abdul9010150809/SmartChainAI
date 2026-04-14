@@ -1,0 +1,6 @@
+Reference: SC-IN-202603
+Origin: Chennai, IN
+Destination: Hyderabad, IN
+Carrier: NorthStar Freight
+Value: 93000
+Comment: Port handoff completed and onward transport scheduled.

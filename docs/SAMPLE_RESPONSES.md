@@ -9,7 +9,7 @@
     "user": {
       "id": "67e9baf7f0a1b3d2f9000001",
       "name": "Demo Operator",
-      "email": "demo@sensechainai.ai",
+        "email": "demo@smartchainai.ai",
       "role": "operator"
     }
   }

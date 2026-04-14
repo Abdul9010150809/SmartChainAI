@@ -8,7 +8,10 @@ export function validate(schema: ObjectSchema, property: 'body' | 'params' | 'qu
     if (error) {
       return res.status(400).json({
         message: 'Validation failed',
-        details: error.details.map((detail) => detail.message)
+        details: error.details.map((detail) => {
+          const field = detail.path.length ? detail.path.join('.') : 'request';
+          return `${field}: ${detail.message}`;
+        })
       });
     }
 

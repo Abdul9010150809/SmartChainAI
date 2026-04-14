@@ -1,0 +1,2 @@
+olistbr/brazilian-ecommerce -> /home/rgukt/Github/SmartChainAI/datasets/olistbr_brazilian-ecommerce
+ziya07/smart-logistics-supply-chain-dataset -> /home/rgukt/Github/SmartChainAI/datasets/ziya07_smart-logistics-supply-chain-dataset

@@ -1,0 +1,6 @@
+Shipment ID: SC-IN-202602
+From: Delhi, IN
+To: Bengaluru, IN
+Logistics Provider: ExpressLink
+Shipment Value: 68500
+Priority: High

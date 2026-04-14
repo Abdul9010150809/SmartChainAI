@@ -17,7 +17,7 @@ export function DashboardPage() {
             <p className="text-xs uppercase tracking-[0.35em] text-teal">Operations Command Center</p>
             <h2 className="mt-2 text-4xl font-semibold tracking-tight text-ink">Track shipments, forecast demand, and surface risk early.</h2>
             <p className="mt-3 max-w-3xl text-slate-600">
-              SenseChainAI centralizes shipment telemetry, delivery risk scoring, and predictive analytics for logistics teams.
+              SmartChainAI centralizes shipment telemetry, delivery risk scoring, and predictive analytics for logistics teams.
             </p>
           </div>
           <button

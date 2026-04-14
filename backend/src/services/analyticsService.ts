@@ -87,3 +87,71 @@ export async function getDemandForecast(ownerId: string) {
     return buildDemandFallback(series);
   }
 }
+
+export async function getOperationalInsights(ownerId: string) {
+  const shipments = await Shipment.find({ owner: ownerId })
+    .select('trackingNumber status carrier value delayRisk currentLocation eta createdAt')
+    .lean();
+
+  const backlogByStatus = shipments.reduce((accumulator, shipment) => {
+    accumulator[shipment.status] = (accumulator[shipment.status] ?? 0) + 1;
+    return accumulator;
+  }, {} as Record<string, number>);
+
+  const carrierMap = new Map<string, number>();
+  for (const shipment of shipments) {
+    carrierMap.set(shipment.carrier, (carrierMap.get(shipment.carrier) ?? 0) + 1);
+  }
+
+  const averageValue = shipments.length
+    ? Math.round((shipments.reduce((total, shipment) => total + shipment.value, 0) / shipments.length) * 10) / 10
+    : 0;
+
+  const highRiskShipments = shipments
+    .filter((shipment) => shipment.delayRisk >= 0.7 || shipment.status === 'delayed')
+    .sort((left, right) => right.delayRisk - left.delayRisk)
+    .slice(0, 5)
+    .map((shipment) => ({
+      trackingNumber: shipment.trackingNumber,
+      status: shipment.status,
+      currentLocation: shipment.currentLocation,
+      delayRisk: shipment.delayRisk
+    }));
+
+  const sortedCarriers = Array.from(carrierMap.entries())
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 4)
+    .map(([carrier, count]) => ({
+      carrier,
+      count,
+      share: shipments.length ? Math.round((count / shipments.length) * 100) : 0
+    }));
+
+  const attentionItems = [
+    {
+      title: highRiskShipments.length ? `${highRiskShipments.length} high-risk shipments need review` : 'No high-risk shipments detected',
+      detail: highRiskShipments.length
+        ? 'Prioritize dispatch contact, customs follow-up, and route verification for these lanes.'
+        : 'Current risk levels are under control.'
+    },
+    {
+      title: sortedCarriers[0] ? `Most active carrier: ${sortedCarriers[0].carrier}` : 'No carrier data yet',
+      detail: sortedCarriers[0]
+        ? `${sortedCarriers[0].count} shipments are currently assigned to this carrier.`
+        : 'Create shipments to populate carrier concentration metrics.'
+    },
+    {
+      title: `Average shipment value: ${averageValue.toLocaleString()}`,
+      detail: 'Use this to gauge high-value lane exposure and prioritize insurance coverage.'
+    }
+  ];
+
+  return {
+    totalShipments: shipments.length,
+    averageValue,
+    backlogByStatus,
+    topCarriers: sortedCarriers,
+    highRiskShipments,
+    attentionItems
+  };
+}

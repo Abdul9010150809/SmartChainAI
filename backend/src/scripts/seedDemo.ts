@@ -6,9 +6,9 @@ async function main() {
   await connectDatabase();
 
   const shouldReset = process.argv.includes('--reset');
-  const session = shouldReset ? await resetDemoData() : await seedDemoData();
+  await (shouldReset ? resetDemoData() : seedDemoData());
 
-  logger.info(`Demo dataset seeded for ${session.user.email}`);
+  logger.info('Demo dataset seeded for admin, operator, and viewer accounts');
   process.exit(0);
 }
 

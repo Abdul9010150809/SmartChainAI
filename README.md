@@ -1,74 +1,163 @@
-# SenseChainAI
+# SmartChainAI
 
-SenseChainAI is a logistics intelligence platform for shipment tracking, delivery risk scoring, demand forecasting, and operations analytics.
+SmartChainAI is an end-to-end logistics intelligence platform that combines real-time shipment operations, API-driven analytics, and AI forecasting into one production-ready stack.
 
-## Architecture
+## Why SmartChainAI
 
-- `frontend`: React + Vite + Tailwind dashboard for tracking and analytics
-- `backend`: Express + MongoDB API with auth, validation, and orchestration logic
-- `ai-service`: FastAPI service for delay prediction and demand forecasting
-- `tests`: Frontend, backend, and AI test suites
-- `docs`: API and system design documentation
+- Live shipment visibility across operations flows
+- Risk-aware delivery insights and delay scoring
+- Demand forecasting support through a dedicated AI service
+- Full-stack architecture for local development and container deployment
 
-## Features
+## SmartChainAI vs Existing Approaches
 
-- JWT-based authentication
-- Shipment tracking and analytics dashboard
-- Delay prediction and demand forecasting via REST
-- MongoDB-backed persistence with validation and indexes
-- Centralized logging and error handling
+| Area | Existing Logistics Tools | SmartChainAI |
+|---|---|---|
+| Tracking | Mostly status-only timelines | Real-time tracking with analytics context |
+| Risk Insights | Reactive alerts after delay | Proactive delay risk scoring and expected delay prediction |
+| Forecasting | External spreadsheets/manual planning | Built-in AI forecasting service via API |
+| Architecture | Siloed dashboard + separate services | Unified frontend, backend, AI microservice architecture |
+| Developer Experience | Hard to run locally end-to-end | One repo with quick-start scripts, Docker, and tests |
+| Data Validation | Limited visibility into data quality | Dataset attachment checks and automated test coverage |
 
-## Local Setup
+This makes SmartChainAI suitable for teams that need both operational monitoring and decision intelligence in a single platform.
 
-1. Copy `.env.example` to `.env` and adjust values as needed.
-2. Use Node `20.x` (`nvm use`) for frontend/backend commands.
-3. Install dependencies for each service.
-4. Add `GOOGLE_MAPS_API_KEY` in `.env` for location services.
-5. Start MongoDB, backend, AI service, and frontend.
+## Core Capabilities
 
-### Demo Launch
+- Secure JWT authentication and protected APIs
+- Shipment, analytics, and location endpoints in the backend
+- Interactive React dashboard with tracking and map views
+- FastAPI AI microservice for prediction and forecasting workloads
+- Automated tests across frontend, backend, and AI modules
 
-```bash
-bash scripts/start-local.sh
+## Tech Stack
+
+- Frontend: React, Vite, Tailwind CSS
+- Backend: Node.js, Express, TypeScript, MongoDB, Joi
+- AI Service: FastAPI, Pydantic, Python
+- Tooling: Jest, Pytest, Docker, npm workspaces
+
+## Project Structure
+
+```text
+SmartChainAI/
+├── frontend/                     # React dashboard (tracking, analytics, maps)
+├── backend/                      # Express API, auth, validation, business logic
+├── ai-service/                   # FastAPI prediction and forecasting service
+├── datasets/                     # Kaggle datasets used by project workflows
+│   ├── olistbr_brazilian-ecommerce/
+│   └── ziya07_smart-logistics-supply-chain-dataset/
+├── tests/                        # Test suites (frontend, backend, ai)
+├── docs/                         # API and architecture docs
+├── scripts/                      # Local orchestration and utility scripts
+├── docker-compose.yml            # Multi-service local container setup
+└── README.md
 ```
 
-### Google Maps Location Service
+## Quick Start
 
-- The backend exposes `GET /api/location/geocode?address=<address>`.
-- The backend exposes `GET /api/location/shipments/:id` for selected shipment map snapshots.
-- The dashboard uses this service to display live Google Maps location cards for the selected shipment.
+1. Copy environment configuration.
 
-### Reset Demo Dataset
+```bash
+cp .env.example .env
+```
+
+2. Use Node 20.
+
+```bash
+nvm use
+```
+
+3. Install monorepo dependencies.
+
+```bash
+npm install
+```
+
+4. Start backend and frontend.
+
+```bash
+npm run dev:backend
+npm run dev:frontend
+```
+
+5. Run AI service in another terminal.
+
+```bash
+cd ai-service
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Helpful Commands
+
+```bash
+npm run lint
+npm run build
+npm run test
+npm run dev:all-local
+```
+
+Reset demo data:
 
 ```bash
 npm run seed:demo --workspace backend -- --reset
 ```
 
-### Run with Docker
+Launch with Docker:
 
 ```bash
 docker compose up --build
 ```
 
-### Run locally
+## Location Service
+
+- GET /api/location/geocode?address=<address>
+- GET /api/location/shipments/:id
+
+The frontend consumes these endpoints to render shipment location cards and map context.
+
+## Datasets
+
+Attached Kaggle datasets in datasets:
+
+- olistbr/brazilian-ecommerce -> datasets/olistbr_brazilian-ecommerce
+- ziya07/smart-logistics-supply-chain-dataset -> datasets/ziya07_smart-logistics-supply-chain-dataset
+
+Validate dataset attachment:
 
 ```bash
-npm install
-npm run dev:backend
-npm run dev:frontend
+python -m pytest tests/ai/test_datasets_attachment.py
 ```
 
-In a separate terminal for the AI service:
+Service export text files for shipment autofill upload:
 
-```bash
-cd ai-service
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+- [export-india-air-priority.txt](docs/service-exports/export-india-air-priority.txt)
+- [export-india-port-crossdock.txt](docs/service-exports/export-india-port-crossdock.txt)
+- [export-india-gulf-lane.txt](docs/service-exports/export-india-gulf-lane.txt)
 
 ## Documentation
 
 - [API.md](docs/API.md)
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- [PROJECT_VISUALS.md](docs/PROJECT_VISUALS.md)
+
+## Screenshots
+
+Dashboard overview
+
+![Dashboard overview](docs/screenshots/dashboard-overview.svg)
+
+Shipments autofill workflow
+
+![Shipments autofill](docs/screenshots/shipments-autofill.svg)
+
+Location trace and map preview
+
+![Location trace](docs/screenshots/location-trace.svg)
+
+Role access matrix in settings
+
+![Role access matrix](docs/screenshots/role-access-matrix.svg)

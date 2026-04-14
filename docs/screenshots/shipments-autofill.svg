@@ -1,0 +1,38 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shipments Autofill Workflow">
+  <rect width="1280" height="720" fill="#f1f5f9"/>
+  <rect x="30" y="24" width="1220" height="60" rx="14" fill="#0f172a"/>
+  <text x="56" y="62" fill="#d1fae5" font-size="24" font-family="Segoe UI, Arial">Shipments Page - Advanced Intake (India Shipping)</text>
+  <rect x="30" y="102" width="520" height="590" rx="14" fill="#ffffff"/>
+  <text x="52" y="142" fill="#0f172a" font-size="20" font-family="Segoe UI, Arial">Document / Notes Input</text>
+  <rect x="52" y="160" width="476" height="220" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="66" y="194" fill="#334155" font-size="14" font-family="monospace">Tracking: SC-IN-202601</text>
+  <text x="66" y="220" fill="#334155" font-size="14" font-family="monospace">Origin: Mumbai, IN</text>
+  <text x="66" y="246" fill="#334155" font-size="14" font-family="monospace">Destination: Dubai, UAE</text>
+  <text x="66" y="272" fill="#334155" font-size="14" font-family="monospace">Carrier: BlueRoute Cargo</text>
+  <text x="66" y="298" fill="#334155" font-size="14" font-family="monospace">Declared Value: 124500</text>
+  <rect x="52" y="398" width="220" height="46" rx="23" fill="#111827"/>
+  <text x="88" y="427" fill="#ffffff" font-size="14" font-family="Segoe UI, Arial">Auto-fill from document</text>
+  <rect x="286" y="398" width="180" height="46" rx="23" fill="#ffffff" stroke="#111827"/>
+  <text x="344" y="427" fill="#111827" font-size="14" font-family="Segoe UI, Arial">Voice input</text>
+  <rect x="52" y="466" width="476" height="56" rx="10" fill="#ecfeff" stroke="#22d3ee"/>
+  <text x="66" y="500" fill="#0f766e" font-size="14" font-family="Segoe UI, Arial">Auto-filled: trackingNumber, origin, destination, carrier, value</text>
+  <rect x="570" y="102" width="680" height="590" rx="14" fill="#ffffff"/>
+  <text x="592" y="142" fill="#0f172a" font-size="20" font-family="Segoe UI, Arial">Generated Shipment Form</text>
+  <rect x="592" y="160" width="636" height="66" rx="10" fill="#f8fafc"/>
+  <text x="612" y="186" fill="#64748b" font-size="12" font-family="Segoe UI, Arial">Tracking Number</text>
+  <text x="612" y="210" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">SC-IN-202601</text>
+  <rect x="592" y="238" width="636" height="66" rx="10" fill="#f8fafc"/>
+  <text x="612" y="264" fill="#64748b" font-size="12" font-family="Segoe UI, Arial">Origin</text>
+  <text x="612" y="288" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">Mumbai, IN</text>
+  <rect x="592" y="316" width="636" height="66" rx="10" fill="#f8fafc"/>
+  <text x="612" y="342" fill="#64748b" font-size="12" font-family="Segoe UI, Arial">Destination</text>
+  <text x="612" y="366" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">Dubai, UAE</text>
+  <rect x="592" y="394" width="636" height="66" rx="10" fill="#f8fafc"/>
+  <text x="612" y="420" fill="#64748b" font-size="12" font-family="Segoe UI, Arial">Carrier</text>
+  <text x="612" y="444" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">BlueRoute Cargo</text>
+  <rect x="592" y="472" width="636" height="66" rx="10" fill="#f8fafc"/>
+  <text x="612" y="498" fill="#64748b" font-size="12" font-family="Segoe UI, Arial">Declared Value</text>
+  <text x="612" y="522" fill="#0f172a" font-size="16" font-family="Segoe UI, Arial">124500</text>
+  <rect x="592" y="560" width="220" height="48" rx="24" fill="#0f172a"/>
+  <text x="657" y="590" fill="#ffffff" font-size="14" font-family="Segoe UI, Arial">Create shipment</text>
+</svg>

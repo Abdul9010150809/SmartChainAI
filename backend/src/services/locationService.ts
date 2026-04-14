@@ -90,8 +90,13 @@ export async function geocodeAddress(address: string): Promise<GeocodedLocation>
 }
 
 export function buildStaticMapUrl(latitude: number, longitude: number) {
-  const apiKey = ensureMapsKey();
   const marker = `${latitude},${longitude}`;
 
+  // Use Google Static Maps when key is configured, otherwise fall back to OSM static map.
+  if (!env.googleMapsApiKey) {
+    return `https://staticmap.openstreetmap.de/staticmap.php?center=${marker}&zoom=9&size=1000x420&markers=${marker},red-pushpin`;
+  }
+
+  const apiKey = ensureMapsKey();
   return `https://maps.googleapis.com/maps/api/staticmap?center=${marker}&zoom=9&size=1000x420&scale=2&maptype=roadmap&markers=color:0x0f766e|label:S|${marker}&key=${apiKey}`;
 }

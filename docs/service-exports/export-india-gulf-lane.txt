@@ -1,0 +1,7 @@
+Service Export
+Shipment ID: SC-IN-EXP-51012
+Origin: Mumbai, IN
+Destination: Dubai, UAE
+Carrier: BlueRoute Cargo
+Value: 164500
+Notes: Gulf lane export with customs pre-check complete.

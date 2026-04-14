@@ -1,0 +1,7 @@
+Service Export
+Tracking Number: SC-IN-AIR-31001
+Origin: Delhi, IN
+Destination: Bengaluru, IN
+Carrier: ExpressLink
+Declared Value: 78500
+Notes: Priority movement with same-day dispatch clearance.

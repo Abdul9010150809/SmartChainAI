@@ -1,0 +1,42 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Role Access Matrix in Settings">
+  <rect width="1280" height="720" fill="#f8fafc"/>
+  <rect x="40" y="28" width="1200" height="70" rx="14" fill="#14532d"/>
+  <text x="66" y="72" fill="#dcfce7" font-size="26" font-family="Segoe UI, Arial">Settings - Role Access Matrix</text>
+  <rect x="40" y="120" width="1200" height="550" rx="14" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="66" y="162" fill="#0f172a" font-size="22" font-family="Segoe UI, Arial">Quick role verification for SmartChainAI</text>
+  <rect x="66" y="186" width="1148" height="52" rx="8" fill="#f1f5f9"/>
+  <text x="86" y="218" fill="#0f172a" font-size="15" font-family="Segoe UI, Arial" font-weight="700">Capability</text>
+  <text x="676" y="218" fill="#0f172a" font-size="15" font-family="Segoe UI, Arial" font-weight="700">Admin</text>
+  <text x="846" y="218" fill="#0f172a" font-size="15" font-family="Segoe UI, Arial" font-weight="700">Operator</text>
+  <text x="1036" y="218" fill="#0f172a" font-size="15" font-family="Segoe UI, Arial" font-weight="700">Viewer</text>
+
+  <rect x="66" y="246" width="1148" height="62" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="86" y="283" fill="#334155" font-size="14" font-family="Segoe UI, Arial">View dashboard, shipments, analytics</text>
+  <text x="686" y="283" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="866" y="283" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="1046" y="283" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+
+  <rect x="66" y="316" width="1148" height="62" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="86" y="353" fill="#334155" font-size="14" font-family="Segoe UI, Arial">Create shipment</text>
+  <text x="686" y="353" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="866" y="353" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="1046" y="353" fill="#dc2626" font-size="14" font-family="Segoe UI, Arial">No</text>
+
+  <rect x="66" y="386" width="1148" height="62" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="86" y="423" fill="#334155" font-size="14" font-family="Segoe UI, Arial">Update status and add events</text>
+  <text x="686" y="423" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="866" y="423" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="1046" y="423" fill="#dc2626" font-size="14" font-family="Segoe UI, Arial">No</text>
+
+  <rect x="66" y="456" width="1148" height="62" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="86" y="493" fill="#334155" font-size="14" font-family="Segoe UI, Arial">Use autofill + voice intake</text>
+  <text x="686" y="493" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="866" y="493" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="1046" y="493" fill="#dc2626" font-size="14" font-family="Segoe UI, Arial">No</text>
+
+  <rect x="66" y="526" width="1148" height="62" rx="8" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="86" y="563" fill="#334155" font-size="14" font-family="Segoe UI, Arial">Manage settings and sessions</text>
+  <text x="686" y="563" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="866" y="563" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+  <text x="1046" y="563" fill="#16a34a" font-size="14" font-family="Segoe UI, Arial">Yes</text>
+</svg>

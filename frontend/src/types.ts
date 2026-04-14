@@ -40,6 +40,33 @@ export interface DemandForecastItem {
   expectedOrders: number;
 }
 
+export interface OperationalCarrierInsight {
+  carrier: string;
+  count: number;
+  share: number;
+}
+
+export interface OperationalAttentionItem {
+  title: string;
+  detail: string;
+}
+
+export interface OperationalHighRiskShipment {
+  trackingNumber: string;
+  status: ShipmentStatus;
+  currentLocation: string;
+  delayRisk: number;
+}
+
+export interface OperationalInsights {
+  totalShipments: number;
+  averageValue: number;
+  backlogByStatus: Partial<Record<ShipmentStatus, number>>;
+  topCarriers: OperationalCarrierInsight[];
+  highRiskShipments: OperationalHighRiskShipment[];
+  attentionItems: OperationalAttentionItem[];
+}
+
 export interface DashboardSnapshot {
   overview: OverviewMetrics;
   shipments: Shipment[];

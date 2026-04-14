@@ -8,7 +8,7 @@ export function NotFoundPage() {
         <p className="text-sm uppercase tracking-[0.35em] text-teal">404</p>
         <h2 className="mt-3 text-3xl font-semibold text-ink">Page not found</h2>
         <p className="mt-2 text-slate-500">The route does not exist in the current logistics workspace.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white">
+        <Link to="/dashboard" className="mt-6 inline-flex rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white">
           Return home
         </Link>
       </div>

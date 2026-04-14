@@ -4,7 +4,7 @@ import os
 
 
 class Settings(BaseModel):
-    app_name: str = 'SenseChainAI ML Service'
+    app_name: str = 'SmartChainAI ML Service'
     api_prefix: str = ''
     cors_origins: list[str] = ['http://localhost:5173']
 
