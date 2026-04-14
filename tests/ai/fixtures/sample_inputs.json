@@ -1,0 +1,16 @@
+{
+  "delay_prediction": {
+    "distance_km": 1220,
+    "weather_severity": 0.7,
+    "carrier_reliability": 0.72,
+    "dwell_hours": 8,
+    "load_factor": 0.82,
+    "customs_delay_hours": 2,
+    "vehicle_age_years": 3
+  },
+  "demand_forecast": {
+    "series": [12, 15, 14, 18, 19, 21, 20],
+    "horizon": 4,
+    "smoothing_factor": 0.45
+  }
+}

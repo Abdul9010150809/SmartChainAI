@@ -1,0 +1,22 @@
+{
+  "name": "sensechainai",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:db": "bash scripts/with-node20.sh node scripts/start-local-db.mjs",
+    "dev": "bash scripts/with-node20.sh npm run dev:backend & bash scripts/with-node20.sh npm run dev:frontend",
+    "dev:frontend": "bash scripts/with-node20.sh npm run dev --workspace frontend",
+    "dev:backend": "bash scripts/with-node20.sh npm run dev --workspace backend",
+    "test": "bash scripts/with-node20.sh npm run test --workspace backend && bash scripts/with-node20.sh npm run test --workspace frontend",
+    "build": "bash scripts/with-node20.sh npm run build --workspace backend && bash scripts/with-node20.sh npm run build --workspace frontend",
+    "lint": "bash scripts/with-node20.sh npm run lint --workspace backend && bash scripts/with-node20.sh npm run lint --workspace frontend",
+    "dev:all-local": "bash scripts/with-node20.sh npm run dev:db & bash scripts/with-node20.sh npm run dev:backend & bash scripts/with-node20.sh npm run dev:frontend"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
