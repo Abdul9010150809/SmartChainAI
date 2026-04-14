@@ -2,6 +2,7 @@ export type ShipmentStatus = 'pending' | 'in_transit' | 'delivered' | 'delayed' 
 
 export interface ShipmentEvent {
   id: string;
+  _id?: string;
   title: string;
   message: string;
   occurredAt: string;
@@ -9,6 +10,7 @@ export interface ShipmentEvent {
 
 export interface Shipment {
   id: string;
+  _id?: string;
   trackingNumber: string;
   origin: string;
   destination: string;

@@ -2,7 +2,7 @@ import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Layout } from '../components/Layout';
 import { ShipmentMapCard } from '../components/ShipmentMapCard';
 import { useDashboardData } from '../hooks/useDashboardData';
-import type { ShipmentDraft } from '../types';
+import type { Shipment, ShipmentDraft } from '../types';
 
 const initialForm: ShipmentDraft = {
   trackingNumber: '',
@@ -171,6 +171,14 @@ function formatFieldName(field: string) {
   return field.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
 }
 
+function resolveShipmentId(shipment: Shipment | undefined) {
+  if (!shipment) {
+    return null;
+  }
+
+  return shipment.id || shipment._id || null;
+}
+
 export function ShipmentsPage() {
   const { shipments, submitShipment, currentUser } = useDashboardData();
   const [form, setForm] = useState<ShipmentDraft>(initialForm);
@@ -182,7 +190,7 @@ export function ShipmentsPage() {
   const [showHelp, setShowHelp] = useState(false);
   const [listening, setListening] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [mapShipmentId, setMapShipmentId] = useState<string | null>(shipments[0]?.id ?? null);
+  const [mapShipmentId, setMapShipmentId] = useState<string | null>(() => resolveShipmentId(shipments[0]));
 
   const isViewer = currentUser?.role === 'viewer';
 
@@ -521,7 +529,7 @@ export function ShipmentsPage() {
         </section>
 
         <section className="col-12 col-xl-7">
-          <div className="card border-0 shadow-sm rounded-4 h-100 mb-4">
+          <div className="card border-0 shadow-sm rounded-4 mb-4">
             <div className="card-body p-4">
               <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
                 <div>
@@ -569,7 +577,7 @@ export function ShipmentsPage() {
             </div>
           </div>
 
-          <div className="card border-0 shadow-sm rounded-4 h-100">
+          <div className="card border-0 shadow-sm rounded-4">
             <div className="card-body p-4">
               <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
                 <div>
@@ -590,8 +598,12 @@ export function ShipmentsPage() {
               </div>
 
               <div className="list-group list-group-flush">
-                {filteredShipments.map((shipment, index) => (
-                  <div key={shipment.id || `${shipment.trackingNumber}-${index}`} className="list-group-item py-3 px-0 border-0 border-bottom">
+                {filteredShipments.map((shipment, index) => {
+                  const shipmentIdentity = resolveShipmentId(shipment) ?? `${shipment.trackingNumber}-${index}`;
+                  const tracedShipment = mapShipmentId && shipmentIdentity === mapShipmentId;
+
+                  return (
+                  <div key={shipmentIdentity} className="list-group-item py-3 px-0 border-0 border-bottom">
                     <div className="d-flex justify-content-between align-items-start gap-3">
                       <div>
                         <div className="fw-semibold">{shipment.trackingNumber}</div>
@@ -599,10 +611,18 @@ export function ShipmentsPage() {
                         <div className="text-muted small">{shipment.carrier}</div>
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-primary mt-2 rounded-pill"
-                          onClick={() => setMapShipmentId(shipment.id)}
+                          className={`btn btn-sm mt-2 rounded-pill ${tracedShipment ? 'btn-primary' : 'btn-outline-primary'}`}
+                          onClick={() => {
+                            const selectedId = resolveShipmentId(shipment);
+                            if (!selectedId) {
+                              setMessage(`Trace unavailable: missing shipment id for ${shipment.trackingNumber}.`);
+                              return;
+                            }
+
+                            setMapShipmentId(selectedId);
+                          }}
                         >
-                          Trace location
+                          {tracedShipment ? 'Tracing location' : 'Trace location'}
                         </button>
                       </div>
                       <div className="text-end">
@@ -612,7 +632,7 @@ export function ShipmentsPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
 
               {!filteredShipments.length ? <div className="text-muted mt-4">No shipments match the current filters.</div> : null}
