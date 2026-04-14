@@ -25,9 +25,9 @@ export const createShipmentSchema = Joi.object({
   const destination = String(value.destination ?? '').toUpperCase();
   const indiaPattern = /(?:,\s*IN\b|\bINDIA\b)/;
 
-  if (!indiaPattern.test(origin) && !indiaPattern.test(destination)) {
+  if (!indiaPattern.test(origin) || !indiaPattern.test(destination)) {
     return helpers.error('any.custom', {
-      message: 'India shipping rule: either origin or destination must be in India (use ", IN" or "India")'
+      message: 'India shipping rule: both origin and destination must be in India (use ", IN" or "India")'
     });
   }
 

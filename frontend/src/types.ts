@@ -93,6 +93,7 @@ export interface GeocodedAddress {
 
 export interface ShipmentLocationSnapshot {
   trackingNumber: string;
+  foliumMapHtml?: string;
   currentLocation: GeocodedAddress & {
     staticMapUrl: string;
   };

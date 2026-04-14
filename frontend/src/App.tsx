@@ -48,7 +48,7 @@ export default function App() {
       <Route path="/analytics" element={<AnalyticsPage />} />
       <Route path="/alerts" element={<AlertsPage />} />
       <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

@@ -5,9 +5,18 @@ import { ForecastPanel } from '../components/ForecastPanel';
 import { ShipmentMapCard } from '../components/ShipmentMapCard';
 import { useDashboardData } from '../hooks/useDashboardData';
 
+function resolveShipmentId(shipment: { id?: string; _id?: string } | undefined) {
+  if (!shipment) {
+    return null;
+  }
+
+  return shipment.id || shipment._id || null;
+}
+
 export function DashboardPage() {
   const { dashboard, shipments, loading, error, selectedShipmentId, selectShipment, refreshDashboard } = useDashboardData();
-  const selectedShipment = shipments.find((shipment) => shipment.id === selectedShipmentId) ?? shipments[0];
+  const selectedShipment = shipments.find((shipment) => resolveShipmentId(shipment) === selectedShipmentId) ?? shipments[0];
+  const selectedShipmentRouteId = resolveShipmentId(selectedShipment);
 
   return (
     <Layout>
@@ -90,9 +99,9 @@ export function DashboardPage() {
               <ForecastPanel delayRisk={dashboard.delayRisk} demandForecast={dashboard.demandForecast} />
             </div>
 
-            {selectedShipmentId ? (
+            {selectedShipmentRouteId ? (
               <div className="mt-8">
-                <ShipmentMapCard shipmentId={selectedShipmentId} />
+                <ShipmentMapCard shipmentId={selectedShipmentRouteId} />
               </div>
             ) : null}
           </>

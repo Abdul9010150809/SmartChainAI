@@ -1,4 +1,6 @@
 import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ShipmentMapCard } from '../components/ShipmentMapCard';
 import { useDashboardData } from '../hooks/useDashboardData';
@@ -24,9 +26,7 @@ const routeSuggestions = [
   'Pune, IN',
   'Ahmedabad, IN',
   'Jaipur, IN',
-  'Kochi, IN',
-  'Dubai, UAE',
-  'Singapore, SG'
+  'Kochi, IN'
 ];
 
 const carrierSuggestions = [
@@ -40,15 +40,15 @@ const carrierSuggestions = [
 
 const demoShipmentTemplates: Array<{ label: string; value: ShipmentDraft; note: string }> = [
   {
-    label: 'India export lane',
+    label: 'West domestic lane',
     value: {
       trackingNumber: 'SC-20001',
       origin: 'Mumbai, IN',
-      destination: 'Dubai, UAE',
+      destination: 'Ahmedabad, IN',
       carrier: 'BlueRoute Cargo',
       value: 12000
     },
-    note: 'Common west-bound export lane'
+    note: 'High-volume domestic lane'
   },
   {
     label: 'India domestic express',
@@ -101,8 +101,8 @@ function validateShipmentDraft(form: ShipmentDraft) {
     errors.push('Declared Value must be greater than 0.');
   }
 
-  if (form.origin.trim() && form.destination.trim() && !isIndiaLocation(form.origin) && !isIndiaLocation(form.destination)) {
-    errors.push('India shipping rule: either Origin or Destination must be in India (use ", IN" or "India").');
+  if (form.origin.trim() && form.destination.trim() && (!isIndiaLocation(form.origin) || !isIndiaLocation(form.destination))) {
+    errors.push('India shipping rule: both Origin and Destination must be in India (use ", IN" or "India").');
   }
 
   return errors;
@@ -181,18 +181,26 @@ function resolveShipmentId(shipment: Shipment | undefined) {
 
 export function ShipmentsPage() {
   const { shipments, submitShipment, currentUser } = useDashboardData();
+  const location = useLocation();
+  const searchFromQuery = new URLSearchParams(location.search).get('search') ?? '';
   const [form, setForm] = useState<ShipmentDraft>(initialForm);
   const [documentText, setDocumentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchFromQuery);
   const [statusFilter, setStatusFilter] = useState<ShipmentFilter>('all');
   const [showHelp, setShowHelp] = useState(false);
   const [listening, setListening] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [mapShipmentId, setMapShipmentId] = useState<string | null>(() => resolveShipmentId(shipments[0]));
 
+  useEffect(() => {
+    setSearch(searchFromQuery);
+  }, [searchFromQuery]);
+
   const isViewer = currentUser?.role === 'viewer';
+  const isAdmin = currentUser?.role === 'admin';
+  const isOperator = currentUser?.role === 'operator';
 
   const filteredShipments = shipments.filter((shipment) => {
     const matchesSearch = [shipment.trackingNumber, shipment.origin, shipment.destination, shipment.carrier]
@@ -231,7 +239,7 @@ export function ShipmentsPage() {
     'Use the origin and destination suggestions to stay consistent with known lanes.',
     'Paste transport notes, invoices, or booking text to auto-fill common fields.',
     'Upload service export .txt files from docs/service-exports for quick autofill.',
-    'Use voice entry to speak a route like “Mumbai to Hamburg” or a carrier name.',
+    'Use voice entry to speak a route like "Mumbai to Delhi" or a carrier name.',
     'Review min/max metrics before submitting high-value or high-risk shipments.'
   ];
 
@@ -374,9 +382,25 @@ export function ShipmentsPage() {
         </div>
       </div>
 
+      <div className="mb-4 rounded-4 border border-slate-200 bg-white p-3">
+        <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
+          <div>
+            <div className="small text-uppercase fw-semibold text-muted">Role access</div>
+            <div className="fw-semibold mt-1">
+              {isAdmin ? 'Admin mode: governance + operations controls' : isOperator ? 'Operator mode: execution controls' : 'Viewer mode: read-only insights'}
+            </div>
+          </div>
+          <div className="d-flex flex-wrap gap-2">
+            <span className={`badge ${isAdmin ? 'text-bg-danger' : 'text-bg-secondary'}`}>Admin: lane policy oversight</span>
+            <span className={`badge ${isOperator ? 'text-bg-info' : 'text-bg-secondary'}`}>Operator: create and trace shipments</span>
+            <span className={`badge ${isViewer ? 'text-bg-warning' : 'text-bg-success'}`}>Viewer: monitor only</span>
+          </div>
+        </div>
+      </div>
+
       <div className="row g-4">
         <section className="col-12 col-xl-5">
-          <div className="card border-0 shadow-sm rounded-4 h-100">
+          <div className="card border-0 shadow-sm rounded-4">
             <div className="card-body p-4">
               <div className="d-flex align-items-start justify-content-between gap-3">
                 <div>
@@ -421,7 +445,7 @@ export function ShipmentsPage() {
                   rows={6}
                   value={documentText}
                   onChange={(event) => setDocumentText(event.target.value)}
-                  placeholder="Paste a document or notes here. Example: Tracking: SC-IN-202601; Origin: Mumbai, IN; Destination: Dubai, UAE; Carrier: BlueRoute Cargo; Value: 12000"
+                  placeholder="Paste a document or notes here. Example: Tracking: SC-IN-202601; Origin: Mumbai, IN; Destination: Delhi, IN; Carrier: BlueRoute Cargo; Value: 12000"
                   disabled={isViewer}
                 />
                 <div className="d-flex flex-wrap gap-2 mt-3">
@@ -597,41 +621,41 @@ export function ShipmentsPage() {
                 </div>
               </div>
 
-              <div className="list-group list-group-flush">
+              <div className="list-group list-group-flush" style={{ maxHeight: '28rem', overflowY: 'auto' }}>
                 {filteredShipments.map((shipment, index) => {
                   const shipmentIdentity = resolveShipmentId(shipment) ?? `${shipment.trackingNumber}-${index}`;
                   const tracedShipment = mapShipmentId && shipmentIdentity === mapShipmentId;
 
                   return (
-                  <div key={shipmentIdentity} className="list-group-item py-3 px-0 border-0 border-bottom">
-                    <div className="d-flex justify-content-between align-items-start gap-3">
-                      <div>
-                        <div className="fw-semibold">{shipment.trackingNumber}</div>
-                        <div className="text-muted small">{shipment.origin} → {shipment.destination}</div>
-                        <div className="text-muted small">{shipment.carrier}</div>
-                        <button
-                          type="button"
-                          className={`btn btn-sm mt-2 rounded-pill ${tracedShipment ? 'btn-primary' : 'btn-outline-primary'}`}
-                          onClick={() => {
-                            const selectedId = resolveShipmentId(shipment);
-                            if (!selectedId) {
-                              setMessage(`Trace unavailable: missing shipment id for ${shipment.trackingNumber}.`);
-                              return;
-                            }
+                    <div key={shipmentIdentity} className="list-group-item py-3 px-0 border-0 border-bottom">
+                      <div className="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                          <div className="fw-semibold">{shipment.trackingNumber}</div>
+                          <div className="text-muted small">{shipment.origin} → {shipment.destination}</div>
+                          <div className="text-muted small">{shipment.carrier}</div>
+                          <button
+                            type="button"
+                            className={`btn btn-sm mt-2 rounded-pill ${tracedShipment ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => {
+                              const selectedId = resolveShipmentId(shipment);
+                              if (!selectedId) {
+                                setMessage(`Trace unavailable: missing shipment id for ${shipment.trackingNumber}.`);
+                                return;
+                              }
 
-                            setMapShipmentId(selectedId);
-                          }}
-                        >
-                          {tracedShipment ? 'Tracing location' : 'Trace location'}
-                        </button>
-                      </div>
-                      <div className="text-end">
-                        <span className="badge text-bg-light border text-capitalize">{shipment.status.replace('_', ' ')}</span>
-                        <div className="small text-muted mt-2">Value: {shipment.value.toLocaleString()}</div>
-                        <div className="small text-muted">Risk: {Math.round(shipment.delayRisk * 100)}%</div>
+                              setMapShipmentId(selectedId);
+                            }}
+                          >
+                            {tracedShipment ? 'Tracing location' : 'Trace location'}
+                          </button>
+                        </div>
+                        <div className="text-end">
+                          <span className="badge text-bg-light border text-capitalize">{shipment.status.replace('_', ' ')}</span>
+                          <div className="small text-muted mt-2">Value: {shipment.value.toLocaleString()}</div>
+                          <div className="small text-muted">Risk: {Math.round(shipment.delayRisk * 100)}%</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
                 )})}
               </div>
 
@@ -640,7 +664,7 @@ export function ShipmentsPage() {
           </div>
 
           {mapShipmentId ? (
-            <div className="card border-0 shadow-sm rounded-4 h-100 mt-4">
+            <div className="card border-0 shadow-sm rounded-4 mt-4">
               <div className="card-body p-4">
                 <div className="mb-3">
                   <p className="text-uppercase small text-teal fw-semibold mb-1">Map Trace</p>

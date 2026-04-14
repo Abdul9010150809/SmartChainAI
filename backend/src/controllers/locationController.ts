@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler';
 import { Shipment } from '../models/Shipment';
+import { renderRouteMap } from '../services/aiClient';
 import { buildStaticMapUrl, geocodeAddress } from '../services/locationService';
 
 async function geocodeWithFallback(candidates: string[]) {
@@ -58,9 +59,36 @@ export const shipmentLocation = asyncHandler(async (req: Request, res: Response)
     shipment.origin
   ]);
 
+  let foliumMapHtml: string | undefined;
+  try {
+    const mapPayload = await renderRouteMap({
+      trackingNumber: shipment.trackingNumber,
+      origin: {
+        latitude: origin.latitude,
+        longitude: origin.longitude,
+        label: origin.formattedAddress
+      },
+      current: {
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        label: currentLocation.formattedAddress
+      },
+      destination: {
+        latitude: destination.latitude,
+        longitude: destination.longitude,
+        label: destination.formattedAddress
+      }
+    });
+
+    foliumMapHtml = mapPayload.html;
+  } catch {
+    foliumMapHtml = undefined;
+  }
+
   res.json({
     data: {
       trackingNumber: shipment.trackingNumber,
+      foliumMapHtml,
       currentLocation: {
         ...currentLocation,
         staticMapUrl: buildStaticMapUrl(currentLocation.latitude, currentLocation.longitude)

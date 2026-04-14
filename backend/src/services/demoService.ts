@@ -29,10 +29,21 @@ function buildDemoTrackingNumber(baseTrackingNumber: string, role: DemoRole) {
   return `SC-${DEMO_TRACKING_PREFIX[role]}-${suffix}`;
 }
 
+function isIndiaRoute(origin: string, destination: string) {
+  const route = `${origin} ${destination}`.toLowerCase();
+  return route.includes('india') || route.includes(', in');
+}
+
 export async function seedDemoShipments(ownerId: string, role: DemoRole) {
-  const shipmentCount = await Shipment.countDocuments({ owner: ownerId });
-  if (shipmentCount > 0) {
+  const existingShipments = await Shipment.find({ owner: ownerId }).select('origin destination trackingNumber').lean();
+  const hasOutOfIndiaRoute = existingShipments.some((shipment) => !isIndiaRoute(shipment.origin, shipment.destination));
+
+  if (existingShipments.length > 0 && !hasOutOfIndiaRoute) {
     return;
+  }
+
+  if (existingShipments.length > 0) {
+    await Shipment.deleteMany({ owner: ownerId });
   }
 
   const now = Date.now();

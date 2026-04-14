@@ -25,6 +25,14 @@ interface AppContextValue {
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
+function resolveShipmentId(shipment: Shipment | undefined) {
+  if (!shipment) {
+    return null;
+  }
+
+  return shipment.id || shipment._id || null;
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [dashboard, setDashboard] = useState<DashboardSnapshot | null>(null);
   const [authenticated, setAuthenticated] = useState(Boolean(getStoredToken()));
@@ -46,7 +54,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const snapshot = await fetchDashboardSnapshot();
       setDashboard(snapshot);
-      setSelectedShipmentId((current) => current ?? snapshot.shipments[0]?.id ?? null);
+      setSelectedShipmentId((current) => {
+        const availableShipmentIds = snapshot.shipments.map((shipment) => resolveShipmentId(shipment)).filter((value): value is string => Boolean(value));
+
+        if (current && availableShipmentIds.includes(current)) {
+          return current;
+        }
+
+        return availableShipmentIds[0] ?? null;
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load dashboard data');
     } finally {
@@ -94,6 +110,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAuthMode('manual');
     setCurrentUser(session.user);
     setAuthenticated(true);
+    setSelectedShipmentId(null);
     await refreshDashboard();
     return session;
   }
@@ -103,6 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAuthMode('manual');
     setCurrentUser(session.user);
     setAuthenticated(true);
+    setSelectedShipmentId(null);
     await refreshDashboard();
     return session;
   }
@@ -112,6 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAuthMode('demo');
     setCurrentUser(session.user);
     setAuthenticated(true);
+    setSelectedShipmentId(null);
     return session;
   }
 
