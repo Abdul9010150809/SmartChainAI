@@ -21,6 +21,13 @@ const fallbackLocations: Record<string, { latitude: number; longitude: number; f
   'chennai': { latitude: 13.0827, longitude: 80.2707, formattedAddress: 'Chennai, Tamil Nadu, India' },
   'hyderabad': { latitude: 17.385, longitude: 78.4867, formattedAddress: 'Hyderabad, Telangana, India' },
   'delhi': { latitude: 28.6139, longitude: 77.209, formattedAddress: 'Delhi, India' },
+  'kolkata': { latitude: 22.5726, longitude: 88.3639, formattedAddress: 'Kolkata, West Bengal, India' },
+  'ahmedabad': { latitude: 23.0225, longitude: 72.5714, formattedAddress: 'Ahmedabad, Gujarat, India' },
+  'jaipur': { latitude: 26.9124, longitude: 75.7873, formattedAddress: 'Jaipur, Rajasthan, India' },
+  'kochi': { latitude: 9.9312, longitude: 76.2673, formattedAddress: 'Kochi, Kerala, India' },
+  'nagpur': { latitude: 21.1458, longitude: 79.0882, formattedAddress: 'Nagpur, Maharashtra, India' },
+  'vijayawada': { latitude: 16.5062, longitude: 80.648, formattedAddress: 'Vijayawada, Andhra Pradesh, India' },
+  'chandigarh': { latitude: 30.7333, longitude: 76.7794, formattedAddress: 'Chandigarh, India' },
   'berlin': { latitude: 52.52, longitude: 13.405, formattedAddress: 'Berlin, Germany' },
   'london': { latitude: 51.5074, longitude: -0.1278, formattedAddress: 'London, United Kingdom' },
   'heathrow': { latitude: 51.47, longitude: -0.4543, formattedAddress: 'Heathrow Airport, United Kingdom' },
@@ -80,19 +87,25 @@ function ensureMapsKey() {
   return env.googleMapsApiKey;
 }
 
+function normalizeAddressForIndia(address: string) {
+  return address.replace(/,\s*IN\b/gi, ', India').trim();
+}
+
 export async function geocodeAddress(address: string): Promise<GeocodedLocation> {
+  const normalizedAddress = normalizeAddressForIndia(address);
+
   try {
     const apiKey = ensureMapsKey();
     const response = await googleMapsClient.get('/geocode/json', {
       params: {
-        address,
+        address: normalizedAddress,
         key: apiKey
       }
     });
 
     const firstResult = response.data?.results?.[0];
     if (!firstResult) {
-      throw new Error(`No geocoding result found for address: ${address}`);
+      throw new Error(`No geocoding result found for address: ${normalizedAddress}`);
     }
 
     return {
@@ -102,13 +115,13 @@ export async function geocodeAddress(address: string): Promise<GeocodedLocation>
       placeId: firstResult.place_id
     };
   } catch (error) {
-    const fallback = fallbackGeocode(address);
+    const fallback = fallbackGeocode(normalizedAddress);
     if (fallback) {
       return fallback;
     }
 
     // Keep location tracing available even when external geocoding cannot resolve the address.
-    return buildDeterministicFallback(address);
+    return buildDeterministicFallback(normalizedAddress);
   };
 }
 

@@ -1,0 +1,39 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Folium Interactive Map Opened in New Tab">
+  <rect width="1280" height="720" fill="#dbeafe"/>
+  <rect x="26" y="20" width="1228" height="680" rx="14" fill="#ffffff"/>
+
+  <rect x="26" y="20" width="1228" height="44" rx="14" fill="#e2e8f0"/>
+  <circle cx="52" cy="42" r="6" fill="#ef4444"/>
+  <circle cx="74" cy="42" r="6" fill="#f59e0b"/>
+  <circle cx="96" cy="42" r="6" fill="#22c55e"/>
+  <text x="130" y="46" fill="#334155" font-size="13" font-family="Segoe UI, Arial">http://localhost:8000/maps/route - Interactive Shipment Route</text>
+
+  <rect x="46" y="84" width="1188" height="596" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
+  <rect x="64" y="104" width="1152" height="48" rx="10" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="88" y="134" fill="#0f172a" font-size="14" font-family="Segoe UI, Arial">SC-OPR-10002 | Pune, India -> Bengaluru, India | Folium Interactive Map</text>
+
+  <rect x="64" y="166" width="1152" height="496" rx="10" fill="#bfdbfe"/>
+
+  <path d="M220 560 C 410 430, 640 360, 920 240" stroke="#0f766e" stroke-width="7" fill="none" stroke-dasharray="10 8"/>
+  <circle cx="220" cy="560" r="13" fill="#16a34a"/>
+  <circle cx="560" cy="410" r="13" fill="#f59e0b"/>
+  <circle cx="920" cy="240" r="13" fill="#dc2626"/>
+
+  <rect x="96" y="510" width="170" height="44" rx="10" fill="#ffffff"/>
+  <text x="118" y="536" fill="#0f172a" font-size="13" font-family="Segoe UI, Arial">Origin: Pune</text>
+
+  <rect x="522" y="366" width="188" height="44" rx="10" fill="#ffffff"/>
+  <text x="542" y="392" fill="#0f172a" font-size="13" font-family="Segoe UI, Arial">Current: Nagpur</text>
+
+  <rect x="892" y="198" width="236" height="44" rx="10" fill="#ffffff"/>
+  <text x="914" y="224" fill="#0f172a" font-size="13" font-family="Segoe UI, Arial">Destination: Bengaluru</text>
+
+  <rect x="86" y="178" width="110" height="30" rx="15" fill="#ecfdf5"/>
+  <text x="108" y="198" fill="#047857" font-size="11" font-family="Segoe UI, Arial" font-weight="700">LEAFLET</text>
+
+  <rect x="208" y="178" width="152" height="30" rx="15" fill="#e0f2fe"/>
+  <text x="234" y="198" fill="#0c4a6e" font-size="11" font-family="Segoe UI, Arial" font-weight="700">FOLIUM RENDER</text>
+
+  <rect x="1030" y="178" width="166" height="30" rx="15" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="1060" y="198" fill="#334155" font-size="11" font-family="Segoe UI, Arial">Zoom controls</text>
+</svg>

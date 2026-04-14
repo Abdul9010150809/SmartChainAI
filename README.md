@@ -158,6 +158,14 @@ Location trace and map preview
 
 ![Location trace](docs/screenshots/location-trace.svg)
 
+Folium map active in shipment card
+
+![Folium map active](docs/screenshots/folium-map-active.svg)
+
+Folium interactive route opened in new tab
+
+![Folium interactive tab](docs/screenshots/folium-interactive-tab.svg)
+
 Role access matrix in settings
 
 ![Role access matrix](docs/screenshots/role-access-matrix.svg)
