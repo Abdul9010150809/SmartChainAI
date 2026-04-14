@@ -1,6 +1,15 @@
 import { apiClient } from './api';
 import type { DashboardSnapshot, ShipmentDraft } from '../types';
 
+export interface ShipmentDelayPrediction {
+  trackingNumber: string;
+  probability: number;
+  expectedDelayHours: number;
+  riskLevel: string;
+  reason: string;
+  source: 'ai' | 'fallback';
+}
+
 type ApiShipment = {
   id?: string;
   _id?: string;
@@ -51,5 +60,10 @@ export async function fetchDashboardSnapshot(): Promise<DashboardSnapshot> {
 
 export async function createShipment(payload: ShipmentDraft) {
   const response = await apiClient.post('/shipments', payload);
+  return response.data.data;
+}
+
+export async function fetchShipmentDelayPrediction(shipmentId: string): Promise<ShipmentDelayPrediction> {
+  const response = await apiClient.get(`/analytics/shipments/${shipmentId}/delay-prediction`);
   return response.data.data;
 }

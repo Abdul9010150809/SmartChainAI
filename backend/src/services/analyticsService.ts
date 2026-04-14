@@ -21,6 +21,49 @@ function buildDemandFallback(series: number[]) {
   }));
 }
 
+function estimateDelayFeatures(shipment: {
+  status: string;
+  carrier: string;
+  value: number;
+  origin?: string;
+  destination?: string;
+  delayRisk?: number;
+}) {
+  const routeText = `${shipment.origin ?? ''} ${shipment.destination ?? ''}`.toLowerCase();
+  const longHaulHint = /(international|port|gulf|export|crossdock)/.test(routeText);
+
+  return {
+    distanceKm: Math.max(longHaulHint ? 420 : 120, Math.round(shipment.value / (longHaulHint ? 14 : 18))),
+    weatherSeverity: shipment.status === 'delayed' ? 0.8 : 0.25,
+    carrierReliability: shipment.carrier.toLowerCase().includes('express') ? 0.85 : 0.65,
+    dwellHours: shipment.status === 'in_transit' ? 5 : shipment.status === 'delayed' ? 10 : 2,
+    loadFactor: shipment.value > 50000 ? 0.9 : 0.55,
+    customsDelayHours: longHaulHint ? 2 : 0,
+    vehicleAgeYears: 4
+  };
+}
+
+function buildPredictionFallback(shipment: {
+  trackingNumber: string;
+  status: string;
+  delayRisk: number;
+}) {
+  const probability = Math.min(0.95, Math.max(0.05, shipment.delayRisk || (shipment.status === 'delayed' ? 0.82 : 0.2)));
+  const expectedDelayHours = Math.max(1, Math.round((shipment.status === 'delayed' ? 10 : 3) + probability * 18));
+  const riskLevel = probability >= 0.75 ? 'high' : probability >= 0.45 ? 'medium' : 'low';
+
+  return {
+    trackingNumber: shipment.trackingNumber,
+    probability,
+    expectedDelayHours,
+    riskLevel,
+    reason: shipment.status === 'delayed'
+      ? 'Shipment is already flagged as delayed.'
+      : 'Using local scoring because the AI service is temporarily unavailable.',
+    source: 'fallback' as const
+  };
+}
+
 export async function getOverview(ownerId: string) {
   const shipments = await Shipment.find({ owner: ownerId }).select('status createdAt updatedAt').lean();
   const activeShipments = shipments.filter((shipment) => ['pending', 'in_transit'].includes(shipment.status)).length;
@@ -50,13 +93,7 @@ export async function getDelayRisk(ownerId: string) {
   try {
     return await Promise.all(
       shipments.map(async (shipment) => {
-        const aiScore = await predictDelay({
-          distanceKm: Math.max(120, shipment.value / 10),
-          weatherSeverity: shipment.status === 'delayed' ? 0.8 : 0.25,
-          carrierReliability: shipment.carrier.toLowerCase().includes('express') ? 0.85 : 0.65,
-          dwellHours: shipment.status === 'in_transit' ? 5 : 2,
-          loadFactor: shipment.value > 50000 ? 0.9 : 0.55
-        });
+        const aiScore = await predictDelay(estimateDelayFeatures(shipment));
 
         return {
           label: shipment.trackingNumber,
@@ -67,6 +104,36 @@ export async function getDelayRisk(ownerId: string) {
     );
   } catch {
     return shipments.map((shipment) => buildDelayFallback(shipment.trackingNumber, shipment.status, shipment.delayRisk));
+  }
+}
+
+export async function getShipmentDelayPrediction(ownerId: string, shipmentId: string) {
+  const shipment = await Shipment.findOne({ _id: shipmentId, owner: ownerId })
+    .select('trackingNumber origin destination carrier status delayRisk value')
+    .lean();
+
+  if (!shipment) {
+    const error = new Error('Shipment not found');
+    (error as Error & { statusCode?: number }).statusCode = 404;
+    throw error;
+  }
+
+  try {
+    const aiScore = await predictDelay(estimateDelayFeatures(shipment));
+    return {
+      trackingNumber: shipment.trackingNumber,
+      probability: aiScore.probability,
+      expectedDelayHours: aiScore.expected_delay_hours,
+      riskLevel: aiScore.risk_level,
+      reason: aiScore.reason,
+      source: 'ai' as const
+    };
+  } catch {
+    return buildPredictionFallback({
+      trackingNumber: shipment.trackingNumber,
+      status: shipment.status,
+      delayRisk: shipment.delayRisk
+    });
   }
 }
 

@@ -12,6 +12,15 @@ export interface DelayPredictionInput {
   carrierReliability: number;
   dwellHours: number;
   loadFactor: number;
+  customsDelayHours?: number;
+  vehicleAgeYears?: number;
+}
+
+export interface DelayPredictionResult {
+  probability: number;
+  expected_delay_hours: number;
+  risk_level: string;
+  reason: string;
 }
 
 export interface DemandForecastInput {
@@ -32,8 +41,16 @@ export interface RouteMapInput {
   trackingNumber: string;
 }
 
-export async function predictDelay(payload: DelayPredictionInput) {
-  const response = await aiClient.post('/predict/delay', payload);
+export async function predictDelay(payload: DelayPredictionInput): Promise<DelayPredictionResult> {
+  const response = await aiClient.post('/predict/delay', {
+    distance_km: payload.distanceKm,
+    weather_severity: payload.weatherSeverity,
+    carrier_reliability: payload.carrierReliability,
+    dwell_hours: payload.dwellHours,
+    load_factor: payload.loadFactor,
+    customs_delay_hours: payload.customsDelayHours ?? 0,
+    vehicle_age_years: payload.vehicleAgeYears ?? 0
+  });
   return response.data.data;
 }
 

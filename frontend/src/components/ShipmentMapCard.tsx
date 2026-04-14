@@ -6,7 +6,7 @@ interface ShipmentMapCardProps {
   shipmentId: string;
 }
 
-function LocalMapIllustration({ current, origin, destination }: Pick<ShipmentLocationSnapshot, 'currentLocation' | 'origin' | 'destination'>) {
+function LocalMapIllustration({ currentLocation, origin, destination }: Pick<ShipmentLocationSnapshot, 'currentLocation' | 'origin' | 'destination'>) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
@@ -71,7 +71,7 @@ function LocalMapIllustration({ current, origin, destination }: Pick<ShipmentLoc
             <text x="616" y="91" fontSize="13" fill="#64748b">Destination</text>
 
             <rect x="286" y="286" rx="18" ry="18" width="220" height="56" fill="#ffffff" stroke="#cbd5e1" />
-            <text x="310" y="318" fontSize="18" fill="#0f172a" fontWeight="700">{current.formattedAddress}</text>
+            <text x="310" y="318" fontSize="18" fill="#0f172a" fontWeight="700">{currentLocation.formattedAddress}</text>
           </g>
         </svg>
       </div>
@@ -186,7 +186,7 @@ export function ShipmentMapCard({ shipmentId }: ShipmentMapCardProps) {
             </div>
           ) : imageFailed ? (
             <LocalMapIllustration
-              current={snapshot.currentLocation}
+              currentLocation={snapshot.currentLocation}
               origin={snapshot.origin}
               destination={snapshot.destination}
             />

@@ -1,9 +1,11 @@
-import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Layout } from '../components/Layout';
 import { ShipmentMapCard } from '../components/ShipmentMapCard';
 import { useDashboardData } from '../hooks/useDashboardData';
+import { fetchShipmentDelayPrediction, type ShipmentDelayPrediction } from '../services/dashboard';
 import type { Shipment, ShipmentDraft } from '../types';
 
 const initialForm: ShipmentDraft = {
@@ -179,6 +181,83 @@ function resolveShipmentId(shipment: Shipment | undefined) {
   return shipment.id || shipment._id || null;
 }
 
+function routeNotificationLevel(delayRisk: number, riskLevel?: string) {
+  if (riskLevel === 'high') {
+    return { label: 'High', className: 'text-bg-danger' };
+  }
+
+  if (riskLevel === 'medium') {
+    return { label: 'Moderate', className: 'text-bg-warning' };
+  }
+
+  if (riskLevel === 'low') {
+    return { label: 'Low', className: 'text-bg-success' };
+  }
+
+  if (delayRisk >= 0.7) {
+    return { label: 'High', className: 'text-bg-danger' };
+  }
+
+  if (delayRisk >= 0.4) {
+    return { label: 'Moderate', className: 'text-bg-warning' };
+  }
+
+  return { label: 'Low', className: 'text-bg-success' };
+}
+
+function predictionSourceBadge(source: ShipmentDelayPrediction['source'] | null | undefined) {
+  if (source === 'ai') {
+    return { label: 'Live AI', className: 'text-bg-success' };
+  }
+
+  if (source === 'fallback') {
+    return { label: 'Fallback Mode', className: 'text-bg-warning' };
+  }
+
+  return { label: 'Prediction Pending', className: 'text-bg-secondary' };
+}
+
+function buildRouteNotifications(shipment: Shipment, prediction: ShipmentDelayPrediction | null) {
+  const notices: string[] = [];
+  const riskPercent = Math.round((prediction?.probability ?? shipment.delayRisk) * 100);
+  const etaDate = new Date(shipment.eta);
+  const hoursToEta = Math.round((etaDate.getTime() - Date.now()) / (1000 * 60 * 60));
+
+  if (shipment.delayRisk >= 0.7) {
+    notices.push(`Route risk alert: ${riskPercent}% delay probability, escalate lane monitoring.`);
+  } else if (shipment.delayRisk >= 0.4) {
+    notices.push(`Route watch: ${riskPercent}% delay probability, keep carrier checkpoint updates active.`);
+  } else {
+    notices.push(`Route stable: ${riskPercent}% delay probability with no current disruption signal.`);
+  }
+
+  if (shipment.status === 'in_transit' && hoursToEta <= 12) {
+    notices.push('ETA window is under 12 hours. Prepare destination handoff and receiving team.');
+  }
+
+  if (shipment.status === 'delayed') {
+    notices.push('Shipment is already delayed. Trigger customer communication and route replanning.');
+  }
+
+  if (prediction?.reason) {
+    notices.push(`Model reason: ${prediction.reason}`);
+  }
+
+  const latestEvent = shipment.events?.[0];
+  if (latestEvent?.message) {
+    notices.push(`Latest route event: ${latestEvent.message}`);
+  }
+
+  return notices;
+}
+
+function buildNotificationText(shipment: Shipment, prediction: ShipmentDelayPrediction | null) {
+  const riskPercent = Math.round((prediction?.probability ?? shipment.delayRisk) * 100);
+  const expectedDelay = Math.round(prediction?.expectedDelayHours ?? 0);
+  const etaNotice = expectedDelay > 0 ? ` | Expected delay ${expectedDelay}h` : '';
+  return `${shipment.trackingNumber}: ${shipment.origin} to ${shipment.destination} | Risk ${riskPercent}%${etaNotice}`;
+}
+
 export function ShipmentsPage() {
   const { shipments, submitShipment, currentUser } = useDashboardData();
   const location = useLocation();
@@ -193,6 +272,11 @@ export function ShipmentsPage() {
   const [listening, setListening] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [mapShipmentId, setMapShipmentId] = useState<string | null>(() => resolveShipmentId(shipments[0]));
+  const [modelPrediction, setModelPrediction] = useState<ShipmentDelayPrediction | null>(null);
+  const [predictionLoading, setPredictionLoading] = useState(false);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
+  const [autoNotifyOnTrace, setAutoNotifyOnTrace] = useState(true);
+  const autoNotifiedShipmentRef = useRef<string | null>(null);
 
   useEffect(() => {
     setSearch(searchFromQuery);
@@ -234,6 +318,70 @@ export function ShipmentsPage() {
       delayedCount
     };
   }, [shipments]);
+
+  const tracedShipment = useMemo(() => {
+    if (!mapShipmentId) {
+      return null;
+    }
+
+    return shipments.find((shipment) => resolveShipmentId(shipment) === mapShipmentId) ?? null;
+  }, [mapShipmentId, shipments]);
+
+  useEffect(() => {
+    const shipmentId = resolveShipmentId(tracedShipment ?? undefined);
+    if (!shipmentId) {
+      setModelPrediction(null);
+      setPredictionLoading(false);
+      setPredictionError(null);
+      return;
+    }
+
+    let active = true;
+    setPredictionLoading(true);
+    setPredictionError(null);
+
+    void fetchShipmentDelayPrediction(shipmentId)
+      .then((prediction) => {
+        if (active) {
+          setModelPrediction(prediction);
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setModelPrediction(null);
+          setPredictionError(error instanceof Error ? error.message : 'Unable to load AI prediction');
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setPredictionLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [tracedShipment]);
+
+  const routeNotifications = useMemo(() => {
+    if (!tracedShipment) {
+      return [] as string[];
+    }
+
+    return buildRouteNotifications(tracedShipment, modelPrediction);
+  }, [tracedShipment, modelPrediction]);
+
+  const predictionChartData = useMemo(() => {
+    if (!tracedShipment) {
+      return [] as Array<{ name: string; value: number }>;
+    }
+
+    const riskPercent = Math.round((modelPrediction?.probability ?? tracedShipment.delayRisk) * 100);
+    return [
+      { name: 'Delay risk', value: riskPercent },
+      { name: 'On-time chance', value: Math.max(0, 100 - riskPercent) }
+    ];
+  }, [tracedShipment, modelPrediction]);
 
   const helperItems = [
     'Use the origin and destination suggestions to stay consistent with known lanes.',
@@ -357,6 +505,56 @@ export function ShipmentsPage() {
       setSubmitting(false);
     }
   };
+
+  const notifyRoute = async (options?: { automatic?: boolean }) => {
+    if (!tracedShipment || !mapShipmentId) {
+      setMessage('Select a shipment trace first to send a route notification.');
+      return;
+    }
+
+    const automatic = Boolean(options?.automatic);
+    const notificationText = buildNotificationText(tracedShipment, modelPrediction);
+
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        new Notification('SmartChainAI route notification', { body: notificationText });
+        setMessage(`${automatic ? 'Auto route notification sent' : 'Route notification sent'}: ${notificationText}`);
+        if (automatic) {
+          autoNotifiedShipmentRef.current = mapShipmentId;
+        }
+        return;
+      }
+
+      if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          new Notification('SmartChainAI route notification', { body: notificationText });
+          setMessage(`${automatic ? 'Auto route notification sent' : 'Route notification sent'}: ${notificationText}`);
+          if (automatic) {
+            autoNotifiedShipmentRef.current = mapShipmentId;
+          }
+          return;
+        }
+      }
+    }
+
+    setMessage(`${automatic ? 'Auto route notification' : 'Route notification'}: ${notificationText}`);
+    if (automatic) {
+      autoNotifiedShipmentRef.current = mapShipmentId;
+    }
+  };
+
+  useEffect(() => {
+    if (!autoNotifyOnTrace || !tracedShipment || !mapShipmentId || predictionLoading) {
+      return;
+    }
+
+    if (autoNotifiedShipmentRef.current === mapShipmentId) {
+      return;
+    }
+
+    void notifyRoute({ automatic: true });
+  }, [autoNotifyOnTrace, mapShipmentId, tracedShipment, predictionLoading, modelPrediction]);
 
   return (
     <Layout>
@@ -672,6 +870,107 @@ export function ShipmentsPage() {
                   <p className="text-muted mb-0">If Google Maps key is unavailable, fallback map tiles are shown automatically.</p>
                 </div>
                 <ShipmentMapCard shipmentId={mapShipmentId} />
+              </div>
+            </div>
+          ) : null}
+
+          {tracedShipment ? (
+            <div className="card border-0 shadow-sm rounded-4 mt-4">
+              <div className="card-body p-4">
+                <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+                  <div>
+                    <p className="text-uppercase small text-teal fw-semibold mb-1">Prediction and Route Notify</p>
+                    <h3 className="h5 mb-1">Risk prediction with active route tracing</h3>
+                    <p className="text-muted mb-0">Live route path plus alert recommendations for the selected shipment trace.</p>
+                  </div>
+                  <div className="d-flex align-items-center gap-2 flex-wrap justify-content-md-end">
+                    <span className={`badge ${predictionSourceBadge(modelPrediction?.source).className}`}>
+                      {predictionSourceBadge(modelPrediction?.source).label}
+                    </span>
+                    <div className="form-check form-switch m-0">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="auto-notify-trace"
+                        checked={autoNotifyOnTrace}
+                        onChange={(event) => {
+                          setAutoNotifyOnTrace(event.target.checked);
+                          if (!event.target.checked) {
+                            autoNotifiedShipmentRef.current = null;
+                          }
+                        }}
+                      />
+                      <label className="form-check-label small text-muted" htmlFor="auto-notify-trace">
+                        Auto notify on trace
+                      </label>
+                    </div>
+                    <button type="button" className="btn btn-outline-dark rounded-pill" onClick={() => { void notifyRoute(); }}>
+                      Notify route
+                    </button>
+                  </div>
+                </div>
+
+                <div className="row g-3 mb-3">
+                  <div className="col-12 col-md-4">
+                    <div className="border rounded-4 p-3 h-100 bg-light">
+                      <div className="small text-uppercase text-muted fw-semibold">Prediction</div>
+                      <div className="fw-semibold mt-1">
+                        {predictionLoading
+                          ? 'Loading model prediction...'
+                          : modelPrediction
+                            ? `Expected delay about ${Math.round(modelPrediction.expectedDelayHours)} hour(s)`
+                            : 'Model prediction unavailable'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-4">
+                    <div className="border rounded-4 p-3 h-100 bg-light">
+                      <div className="small text-uppercase text-muted fw-semibold">Risk Level</div>
+                      <div className="mt-1 d-flex align-items-center gap-2">
+                        <span className={`badge ${routeNotificationLevel(tracedShipment.delayRisk, modelPrediction?.riskLevel).className}`}>
+                          {routeNotificationLevel(tracedShipment.delayRisk, modelPrediction?.riskLevel).label}
+                        </span>
+                        <span className="fw-semibold">{Math.round((modelPrediction?.probability ?? tracedShipment.delayRisk) * 100)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-12 col-md-4">
+                    <div className="border rounded-4 p-3 h-100 bg-light">
+                      <div className="small text-uppercase text-muted fw-semibold">Tracing Route</div>
+                      <div className="fw-semibold mt-1">
+                        {tracedShipment.origin} → {tracedShipment.currentLocation} → {tracedShipment.destination}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {predictionChartData.length ? (
+                  <div className="border rounded-4 p-3 mb-3 bg-white">
+                    <div className="small text-uppercase text-muted fw-semibold mb-2">Prediction Trends</div>
+                    <div style={{ width: '100%', height: 220 }}>
+                      <ResponsiveContainer>
+                        <BarChart data={predictionChartData} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                          <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fontSize: 12 }} />
+                          <Tooltip formatter={(value) => `${value ?? 0}%`} />
+                          <Bar dataKey="value" fill="#0ea5a4" radius={[6, 6, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="border rounded-4 p-3">
+                  <div className="small text-uppercase text-muted fw-semibold mb-2">Route Notifications</div>
+                  {predictionError ? <div className="small text-danger mb-2">AI prediction error: {predictionError}</div> : null}
+                  <ul className="mb-0 ps-3">
+                    {routeNotifications.map((notice, index) => (
+                      <li key={`route-notice-${index}-${notice.slice(0, 12)}`} className="mb-1">{notice}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           ) : null}
